@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Multiplayer Game</title>
+  <style>
+    canvas {
+      background: #000;
+      display: block;
+      margin: 0 auto;
+      border: 2px solid #fff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="game" width="500" height="600"></canvas>
+
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    const socket = io("http://localhost:3000"); // Server must run locally
+
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    const localPlayer = {
+      id: null,
+      x: 250,
+      y: 550,
+      width: 40,
+      height: 40,
+      speed: 5
+    };
+
+    const bullets = [];
+    const players = {};
+
+    let keys = {};
+
+    // Handle connection and server sync
+    socket.on("connect", () => {
+      localPlayer.id = socket.id;
+    });
+
+    socket.on("currentPlayers", (serverPlayers) => {
+      for (let id in serverPlayers) {
+        if (id !== localPlayer.id) {
+          players[id] = serverPlayers[id];
+        }
+      }
+    });
+
+    socket.on("newPlayer", (newPlayer) => {
+      if (newPlayer.id !== localPlayer.id) {
+        players[newPlayer.id] = newPlayer;
+      }
+    });
+
+    socket.on("playerMoved", ({ id, x }) => {
+      if (players[id]) {
+        players[id].x = x;
+      }
+    });
+
+    socket.on("bulletFired", (bullet) => {
+      bullets.push(bullet);
+    });
+
+    socket.on("playerDisconnected", (id) => {
+      delete players[id];
+    });
+
+    // Input handling
+    document.addEventListener("keydown", (e) => {
+      keys[e.key] = true;
+    });
+
+    document.addEventListener("keyup", (e) => {
+      keys[e.key] = false;
+    });
+
+    function shoot() {
+      const bullet = {
+        x: localPlayer.x + localPlayer.width / 2 - 2.5,
+        y: localPlayer.y,
+        id: localPlayer.id
+      };
+      bullets.push(bullet);
+      socket.emit("shoot", bullet);
+    }
+
+    function update() {
+      if (keys["ArrowLeft"] && localPlayer.x > 0) {
+        localPlayer.x -= localPlayer.speed;
+        socket.emit("move", { x: localPlayer.x });
+      }
+
+      if (keys["ArrowRight"] && localPlayer.x < canvas.width - localPlayer.width) {
+        localPlayer.x += localPlayer.speed;
+        socket.emit("move", { x: localPlayer.x });
+      }
+
+      if (keys[" "]) {
+        if (!localPlayer.lastShot || Date.now() - localPlayer.lastShot > 300) {
+          shoot();
+          localPlayer.lastShot = Date.now();
+        }
+      }
+
+      bullets.forEach((bullet, i) => {
+        bullet.y -= 5;
+        if (bullet.y < 0) bullets.splice(i, 1);
+      });
+    }
+
+    function drawPlayer(player, isLocal = false) {
+      ctx.fillStyle = isLocal ? "lime" : "red";
+      ctx.fillRect(player.x, player.y, localPlayer.width, localPlayer.height);
+    }
+
+    function drawBullets() {
+      ctx.fillStyle = "yellow";
+      bullets.forEach((bullet) => {
+        ctx.fillRect(bullet.x, bullet.y, 5, 10);
+      });
+    }
+
+    function gameLoop() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      update();
+      drawPlayer(localPlayer, true);
+
+      for (let id in players) {
+        drawPlayer(players[id]);
+      }
+
+      drawBullets();
+      requestAnimationFrame(gameLoop);
+    }
+
+    gameLoop();
+  </script>
+</body>
+</html>
