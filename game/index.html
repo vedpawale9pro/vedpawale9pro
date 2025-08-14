@@ -1,88 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Multiplayer Tic Tac Toe</title>
+  <meta charset="UTF-8">
+  <title>WebSocket Notes Board</title>
   <style>
-    body { font-family: sans-serif; text-align: center; }
-    #board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; margin: 20px auto; }
-    .cell { width: 100px; height: 100px; font-size: 2em; display: flex; align-items: center; justify-content: center; border: 1px solid #000; cursor: pointer; }
-    input { margin: 5px; }
+    body { font-family: sans-serif; padding: 20px; }
+    #log { border: 1px solid #ccc; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; background: #f9f9f9; }
+    #message { width: 80%; padding: 10px; }
+    #send { padding: 10px; }
   </style>
 </head>
 <body>
-  <h1>Tic Tac Toe</h1>
+  <h1>📝 WebSocket Notes Board</h1>
 
-  <input type="text" id="serverIp" placeholder="Server IP (e.g. ws://localhost:3000)">
-  <input type="text" id="room" placeholder="Room Name">
-  <input type="text" id="username" placeholder="Username">
-  <button onclick="connect()">Join Game</button>
+  <p>
+    Server: <input id="server" value="ws://147.185.221.30:46414" size="40">
+    <button onclick="connect()">Connect</button>
+  </p>
 
-  <h2 id="status">Not connected</h2>
-  <div id="board"></div>
+  <div id="log"></div>
+
+  <input type="text" id="message" placeholder="Write a note..." />
+  <button id="send" onclick="sendMessage()">Send</button>
 
   <script>
     let socket;
-    let mySymbol = '';
-    let myTurn = false;
+    const log = document.getElementById('log');
 
-    const board = document.getElementById('board');
-    const status = document.getElementById('status');
-    const cells = [];
+    function connect() {
+      const serverUrl = document.getElementById('server').value;
+      socket = new WebSocket(serverUrl);
 
-    function drawBoard() {
-      board.innerHTML = '';
-      for (let i = 0; i < 9; i++) {
-        const cell = document.createElement('div');
-        cell.className = 'cell';
-        cell.dataset.index = i;
-        cell.onclick = () => handleMove(i);
-        board.appendChild(cell);
-        cells[i] = cell;
+      socket.onopen = () => addLog("✅ Connected to " + serverUrl);
+      socket.onclose = () => addLog("❌ Disconnected.");
+      socket.onerror = (err) => addLog("⚠️ Error: " + err.message);
+
+      socket.onmessage = (event) => {
+        addLog("📩 " + event.data);
+      };
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('message');
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(input.value);
+        addLog("📤 You: " + input.value);
+        input.value = '';
+      } else {
+        addLog("⚠️ Not connected.");
       }
     }
 
-    function connect() {
-      const ip = document.getElementById('serverIp').value;
-      const room = document.getElementById('room').value;
-      const username = document.getElementById('username').value;
-
-      socket = new WebSocket(ip);
-
-      socket.onopen = () => {
-        socket.send(JSON.stringify({ type: 'join', room, username }));
-        status.innerText = `Connected to ${room} as ${username}`;
-      };
-
-      socket.onmessage = (event) => {
-        const msg = JSON.parse(event.data);
-
-        if (msg.type === 'start') {
-          mySymbol = msg.symbol;
-          myTurn = msg.symbol === 'X';
-          status.innerText = `Game started! You are ${mySymbol}`;
-          drawBoard();
-        }
-
-        if (msg.type === 'move') {
-          cells[msg.index].innerText = msg.symbol;
-          myTurn = msg.symbol !== mySymbol;
-        }
-
-        if (msg.type === 'error') {
-          status.innerText = msg.message;
-        }
-
-        if (msg.type === 'end') {
-          status.innerText = msg.message;
-          myTurn = false;
-        }
-      };
-    }
-
-    function handleMove(index) {
-      if (!myTurn || cells[index].innerText !== '') return;
-      socket.send(JSON.stringify({ type: 'move', index }));
+    function addLog(message) {
+      const div = document.createElement('div');
+      div.textContent = message;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
     }
   </script>
 </body>
