@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>WebSocket Notes Board</title>
+  <title>Live Message Board</title>
   <style>
     body { font-family: sans-serif; padding: 20px; }
-    #log { border: 1px solid #ccc; height: 300px; overflow-y: auto; padding: 10px; margin-bottom: 10px; background: #f9f9f9; }
-    #message { width: 80%; padding: 10px; }
-    #send { padding: 10px; }
+    h1 { margin-bottom: 10px; }
+    #log { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; background: #f9f9f9; }
   </style>
 </head>
 <body>
-  <h1>📝 WebSocket Notes Board</h1>
+  <h1>📡 Live Messages</h1>
 
   <p>
     Server: <input id="server" value="ws://147.185.221.30:46414" size="40">
@@ -20,40 +19,23 @@
 
   <div id="log"></div>
 
-  <input type="text" id="message" placeholder="Write a note..." />
-  <button id="send" onclick="sendMessage()">Send</button>
-
   <script>
     let socket;
     const log = document.getElementById('log');
 
     function connect() {
-      const serverUrl = document.getElementById('server').value;
-      socket = new WebSocket(serverUrl);
+      const url = document.getElementById('server').value;
+      socket = new WebSocket(url);
 
-      socket.onopen = () => addLog("✅ Connected to " + serverUrl);
-      socket.onclose = () => addLog("❌ Disconnected.");
-      socket.onerror = (err) => addLog("⚠️ Error: " + err.message);
-
-      socket.onmessage = (event) => {
-        addLog("📩 " + event.data);
-      };
+      socket.onopen = () => logMessage("✅ Connected to server");
+      socket.onmessage = (event) => logMessage("🟢 " + event.data);
+      socket.onerror = (e) => logMessage("⚠️ Error: " + e.message);
+      socket.onclose = () => logMessage("❌ Disconnected from server");
     }
 
-    function sendMessage() {
-      const input = document.getElementById('message');
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(input.value);
-        addLog("📤 You: " + input.value);
-        input.value = '';
-      } else {
-        addLog("⚠️ Not connected.");
-      }
-    }
-
-    function addLog(message) {
+    function logMessage(msg) {
       const div = document.createElement('div');
-      div.textContent = message;
+      div.textContent = msg;
       log.appendChild(div);
       log.scrollTop = log.scrollHeight;
     }
