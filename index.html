@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Products Display from API</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 50%,rgba(209,209,209,1) 50%,rgba(254,254,254,1) 100%);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+    .card {
+      width: 360px;
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.1);
+      transition: .3s;
+      cursor: pointer;
+      overflow: hidden;
+      position: relative;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,.15);
+    }
+    .badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      color: #fff;
+      padding: 5px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,.2);
+      z-index: 10;
+    }
+    .tilt {
+      overflow: hidden;
+    }
+    .img {
+      height: 200px;
+      overflow: hidden;
+    }
+    .img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .5s;
+    }
+    .card:hover .img img {
+      transform: scale(1.05);
+    }
+    .info {
+      padding: 20px;
+    }
+    .cat {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #71717A;
+      margin-bottom: 5px;
+    }
+    .title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #18181B;
+      margin: 0 0 10px;
+      letter-spacing: -0.5px;
+    }
+    .desc {
+      font-size: 13px;
+      color: #52525B;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .feats {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .feat {
+      font-size: 10px;
+      background: #F4F4F5;
+      color: #71717A;
+      padding: 3px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .price {
+      display: flex;
+      flex-direction: column;
+    }
+    .old {
+      font-size: 13px;
+      text-decoration: line-through;
+      color: #A1A1AA;
+      margin-bottom: 2px;
+    }
+    .new {
+      font-size: 20px;
+      font-weight: 700;
+      color: #18181B;
+    }
+    .btn {
+      background: linear-gradient(45deg,#18181B,#27272A);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 15px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: .3s;
+      box-shadow: 0 3px 10px rgba(0,0,0,.1);
+    }
+    .btn:hover {
+      background: linear-gradient(45deg,#27272A,#3F3F46);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,.15);
+    }
+    .icon {
+      transition: transform .3s;
+    }
+    .btn:hover .icon {
+      transform: rotate(-10deg) scale(1.1);
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid #F4F4F5;
+      padding-top: 12px;
+    }
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .rcount {
+      margin-left: 6px;
+      font-size: 11px;
+      color: #71717A;
+    }
+    .stock {
+      font-size: 11px;
+      font-weight: 600;
+      color: #22C55E;
+    }
+  </style>
+</head>
+<body>
+
+<h1 style="text-align:center;">Product List</h1>
+
+<div class="card-container" id="products-container">
+  <!-- Product cards will be inserted here -->
+</div>
+
+<script>
+  // Replace the URL below with your actual API endpoint
+  const apiUrl = 'https://yourdomain.com/api/products.php';
+
+  fetch(apiUrl)
+    .then(res => {
+      if (!res.ok) throw new Error('Network response was not ok');
+      return res.json();
+    })
+    .then(products => {
+      const container = document.getElementById('products-container');
+      products.forEach(product => {
+        const featuresHtml = product.features.split(',').map(f => `<span class="feat">${f.trim()}</span>`).join('');
+        const stars = Array(Math.floor(product.rating)).fill(`
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="0.5">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        `).join('');
+
+        const cardHtml = `
+          <div class="card">
+            <div class="badge" style="background: ${product.tag_color};">${product.badge}</div>
+            <div class="tilt">
+              <div class="img">
+                <img src="${product.image_url}" alt="${product.title}" />
+              </div>
+            </div>
+            <div class="info">
+              <div class="cat">${product.category}</div>
+              <h2 class="title">${product.title}</h2>
+              <p class="desc">${product.description}</p>
+              <div class="feats">${featuresHtml}</div>
+              <div class="bottom">
+                <div class="price">
+                  <span class="old">$${parseFloat(product.old_price).toFixed(2)}</span>
+                  <span class="new">$${parseFloat(product.new_price).toFixed(2)}</span>
+                </div>
+                <button class="btn">
+                  <span>Add to Cart</span>
+                  <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4"/>
+                    <line x1="3" y1="6" x2="21" y2="6"/>
+                    <path d="M16 10a4 4 0 01-8 0"/>
+                  </svg>
+                </button>
+              </div>
+              <div class="meta">
+                <div class="rating">${stars}<span class="rcount">${product.review_count} Reviews</span></div>
+                <div class="stock">${product.stock_status}</div>
+              </div>
+            </div>
+          </div>
+        `;
+
+        container.insertAdjacentHTML('beforeend', cardHtml);
+      });
+    })
+    .catch(err => {
+      document.getElementById('products-container').innerHTML = `<p style="color:red; text-align:center;">Failed to load products: ${err.message}</p>`;
+      console.error(err);
+    });
+</script>
+
+</body>
+</html>
