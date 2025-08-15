@@ -1,24 +1,117 @@
+<?php
+// DB Config — change to your actual DB credentials
+$host = 'sql204.byethost7.com';
+$user = 'b7_39048012';
+$pass = 'Josh@2023';
+$dbname = 'b7_39048012_amazon';
+
+// Create DB connection
+$conn = new mysqli($host, $user, $pass, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die('Connection failed: ' . $conn->connect_error);
+}
+
+// Fetch all products
+$sql = "SELECT * FROM products ORDER BY id DESC";
+$result = $conn->query($sql);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Car Racing Game</title>
+  <title>All Products</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #444;
+    <?php include 'style.css'; ?> /* Your existing styles */
+
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center; /* or space-between, space-around */
+      gap: 20px;
+      padding: 20px;
     }
-    canvas {
-      display: block;
-      margin: auto;
-      background: #333;
+
+    /* Ensure cards have fixed width */
+    .card {
+      width: 360px; /* same as your card width */
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
-  <canvas id="gameCanvas" width="400" height="600"></canvas>
-  <script src="game.js"></script>
+
+<div class="card-container">
+<?php
+if ($result->num_rows > 0):
+    while ($row = $result->fetch_assoc()):
+        // Get fields
+        $title = $row['title'];
+        $category = $row['category'];
+        $desc = $row['description'];
+        $badge = $row['badge'];
+        $tag_color = $row['tag_color'];
+        $features = explode(',', $row['features']);
+        $old_price = $row['old_price'];
+        $new_price = $row['new_price'];
+        $img = $row['image_url'];
+        $rating = $row['rating'];
+        $review_count = $row['review_count'];
+        $stock_status = $row['stock_status'];
+?>
+  <div class="card">
+    <div class="badge" style="background: <?= htmlspecialchars($tag_color) ?>;"><?= htmlspecialchars($badge) ?></div>
+    <div class="tilt">
+      <div class="img"><img src="<?= htmlspecialchars($img) ?>" alt="<?= htmlspecialchars($title) ?>"></div>
+    </div>
+    <div class="info">
+      <div class="cat"><?= htmlspecialchars($category) ?></div>
+      <h2 class="title"><?= htmlspecialchars($title) ?></h2>
+      <p class="desc"><?= htmlspecialchars($desc) ?></p>
+      <div class="feats">
+        <?php foreach ($features as $feat): ?>
+          <span class="feat"><?= htmlspecialchars(trim($feat)) ?></span>
+        <?php endforeach; ?>
+      </div>
+      <div class="bottom">
+        <div class="price">
+          <span class="old">$<?= number_format($old_price, 2) ?></span>
+          <span class="new">$<?= number_format($new_price, 2) ?></span>
+        </div>
+        <button class="btn">
+          <span>Add to Cart</span>
+          <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        </button>
+      </div>
+      <div class="meta">
+        <div class="rating">
+          <?php for ($i = 0; $i < floor($rating); $i++): ?>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="0.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          <?php endfor; ?>
+          <span class="rcount"><?= htmlspecialchars($review_count) ?> Reviews</span>
+        </div>
+        <div class="stock"><?= htmlspecialchars($stock_status) ?></div>
+      </div>
+    </div>
+  </div>
+<?php
+    endwhile;
+else:
+    echo "<p>No products found.</p>";
+endif;
+
+$conn->close();
+?>
+</div> <!-- End card-container -->
+
 </body>
 </html>
