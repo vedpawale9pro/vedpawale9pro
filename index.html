@@ -1,245 +1,227 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Products Display from API</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cloud Practical — Basic Test Page</title>
   <style>
-    body {
-      background: linear-gradient(135deg, rgba(226,226,226,1) 0%,rgba(219,219,219,1) 50%,rgba(209,209,209,1) 50%,rgba(209,209,209,1) 50%,rgba(254,254,254,1) 100%);
-      font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    .card-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
-    .card {
-      width: 360px;
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.1);
-      transition: .3s;
-      cursor: pointer;
-      overflow: hidden;
-      position: relative;
-    }
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0,0,0,.15);
-    }
-    .badge {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      color: #fff;
-      padding: 5px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,.2);
-      z-index: 10;
-    }
-    .tilt {
-      overflow: hidden;
-    }
-    .img {
-      height: 200px;
-      overflow: hidden;
-    }
-    .img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform .5s;
-    }
-    .card:hover .img img {
-      transform: scale(1.05);
-    }
-    .info {
-      padding: 20px;
-    }
-    .cat {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #71717A;
-      margin-bottom: 5px;
-    }
-    .title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #18181B;
-      margin: 0 0 10px;
-      letter-spacing: -0.5px;
-    }
-    .desc {
-      font-size: 13px;
-      color: #52525B;
-      line-height: 1.4;
-      margin-bottom: 12px;
-    }
-    .feats {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 15px;
-      flex-wrap: wrap;
-    }
-    .feat {
-      font-size: 10px;
-      background: #F4F4F5;
-      color: #71717A;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-weight: 500;
-    }
-    .bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-    .price {
-      display: flex;
-      flex-direction: column;
-    }
-    .old {
-      font-size: 13px;
-      text-decoration: line-through;
-      color: #A1A1AA;
-      margin-bottom: 2px;
-    }
-    .new {
-      font-size: 20px;
-      font-weight: 700;
-      color: #18181B;
-    }
-    .btn {
-      background: linear-gradient(45deg,#18181B,#27272A);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 8px 15px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: .3s;
-      box-shadow: 0 3px 10px rgba(0,0,0,.1);
-    }
-    .btn:hover {
-      background: linear-gradient(45deg,#27272A,#3F3F46);
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(0,0,0,.15);
-    }
-    .icon {
-      transition: transform .3s;
-    }
-    .btn:hover .icon {
-      transform: rotate(-10deg) scale(1.1);
-    }
-    .meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-top: 1px solid #F4F4F5;
-      padding-top: 12px;
-    }
-    .rating {
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-    .rcount {
-      margin-left: 6px;
-      font-size: 11px;
-      color: #71717A;
-    }
-    .stock {
-      font-size: 11px;
-      font-weight: 600;
-      color: #22C55E;
-    }
+    body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; margin: 20px; line-height: 1.45; color: #111; }
+    h1 { font-size: 1.6rem; margin-bottom: .2rem; }
+    .card { border: 1px solid #ddd; padding: 12px; margin: 10px 0; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.04); }
+    label { display:block; margin-top:8px; font-weight:600; }
+    input[type="text"], input[type="url"], textarea { width:100%; padding:8px; margin-top:6px; box-sizing:border-box; border-radius:6px; border:1px solid #ccc; }
+    button { margin-top:10px; padding:8px 12px; border-radius:6px; border: none; cursor:pointer; background:#0366d6; color:#fff; }
+    pre { background:#f6f8fa; padding:8px; border-radius:6px; overflow:auto; }
+    .result { padding:8px; margin-top:8px; border-radius:6px; background:#fff; border:1px dashed #eee; }
+    small.note { color:#666; display:block; margin-top:6px; }
   </style>
 </head>
 <body>
+  <h1>Cloud Practical — Basic Test Page</h1>
+  <p>Use the controls below to test endpoints and basic network behaviors. Replace sample endpoints with your cloud URLs before running tests.</p>
 
-<h1 style="text-align:center;">Product List</h1>
+  <div class="card">
+    <h2>1) HTTP Latency (RTT)</h2>
+    <label>URL to ping (GET):</label>
+    <input id="pingUrl" type="url" value="https://httpbin.org/get" />
+    <button id="pingBtn">Run 5 RTT measurements</button>
+    <div id="pingResults" class="result">No results yet.</div>
+    <small class="note">This measures round-trip time using fetch (includes server processing + network).</small>
+  </div>
 
-<div class="card-container" id="products-container">
-  <!-- Product cards will be inserted here -->
-</div>
+  <div class="card">
+    <h2>2) Download Speed</h2>
+    <label>File URL to download (provide a reasonably large file for a better test):</label>
+    <input id="downloadUrl" type="url" value="https://speed.hetzner.de/100MB.bin" />
+    <label>Bytes to read from response (max):</label>
+    <input id="downloadBytes" type="text" value="5000000" />
+    <button id="downloadBtn">Run download test</button>
+    <div id="downloadResults" class="result">No results yet.</div>
+    <small class="note">If the URL supports range requests you can limit bytes. Set the URL to your cloud object (S3/GCS/Azure Blob) to test throughput.</small>
+  </div>
+
+  <div class="card">
+    <h2>3) Upload Speed</h2>
+    <label>Upload endpoint (POST):</label>
+    <input id="uploadUrl" type="url" value="https://httpbin.org/post" />
+    <label>Upload size (MB):</label>
+    <input id="uploadSize" type="text" value="5" />
+    <button id="uploadBtn">Run upload test</button>
+    <div id="uploadResults" class="result">No results yet.</div>
+    <small class="note">Use your cloud API endpoint that accepts file uploads to measure ingress speed. CORS must allow requests from this page.</small>
+  </div>
+
+  <div class="card">
+    <h2>4) POST JSON Echo Test</h2>
+    <label>Echo endpoint (POST):</label>
+    <input id="echoUrl" type="url" value="https://httpbin.org/post" />
+    <label>JSON to send:</label>
+    <textarea id="jsonPayload" rows="4">{ "test": "cloud-practical", "time": "" }</textarea>
+    <button id="echoBtn">Send JSON</button>
+    <div id="echoResults" class="result">No results yet.</div>
+  </div>
+
+  <div class="card">
+    <h2>5) WebSocket Test</h2>
+    <label>WebSocket URL (wss://):</label>
+    <input id="wsUrl" type="text" value="wss://echo.websocket.events/" />
+    <button id="wsConnectBtn">Connect</button>
+    <button id="wsSendBtn" disabled>Send test message</button>
+    <button id="wsCloseBtn" disabled>Close</button>
+    <div id="wsResults" class="result">Not connected.</div>
+    <small class="note">Use a WebSocket echo endpoint (or your server). If using cloud-managed services, ensure proper auth/CORS/wss support.</small>
+  </div>
 
 <script>
-  // Replace the URL below with your actual API endpoint
-  const apiUrl = 'https://pawalepcp.22web.org/amazon/api.php';
+  // Utility: log to element
+  function show(elId, html) { document.getElementById(elId).innerHTML = html; }
 
-  fetch(apiUrl)
-    .then(res => {
-      if (!res.ok) throw new Error('Network response was not ok');
-      return res.json();
-    })
-    .then(products => {
-      const container = document.getElementById('products-container');
-      products.forEach(product => {
-        const featuresHtml = product.features.split(',').map(f => `<span class="feat">${f.trim()}</span>`).join('');
-        const stars = Array(Math.floor(product.rating)).fill(`
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#FFD700" stroke="#FFD700" stroke-width="0.5">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-          </svg>
-        `).join('');
+  // 1) Ping (RTT)
+  document.getElementById('pingBtn').addEventListener('click', async () => {
+    const url = document.getElementById('pingUrl').value.trim();
+    if (!url) return show('pingResults','Enter a URL.');
+    const runs = 5;
+    const times = [];
+    show('pingResults','Running...');
+    for (let i=0;i<runs;i++){
+      const t0 = performance.now();
+      try {
+        const r = await fetch(url, {cache:'no-store', mode:'cors'});
+        await r.text().catch(()=>{}); // consume body
+        const t1 = performance.now();
+        times.push(t1-t0);
+      } catch(err) {
+        times.push(null);
+      }
+    }
+    const good = times.filter(x=>x!==null);
+    const avg = good.length ? (good.reduce((a,b)=>a+b,0)/good.length).toFixed(2) : 'N/A';
+    show('pingResults', `<strong>RTT samples (ms):</strong> ${times.map(t=>t===null?'err':t.toFixed(2)).join(', ')}<br><strong>Average (ms):</strong> ${avg}`);
+  });
 
-        const cardHtml = `
-          <div class="card">
-            <div class="badge" style="background: ${product.tag_color};">${product.badge}</div>
-            <div class="tilt">
-              <div class="img">
-                <img src="${product.image_url}" alt="${product.title}" />
-              </div>
-            </div>
-            <div class="info">
-              <div class="cat">${product.category}</div>
-              <h2 class="title">${product.title}</h2>
-              <p class="desc">${product.description}</p>
-              <div class="feats">${featuresHtml}</div>
-              <div class="bottom">
-                <div class="price">
-                  <span class="old">$${parseFloat(product.old_price).toFixed(2)}</span>
-                  <span class="new">$${parseFloat(product.new_price).toFixed(2)}</span>
-                </div>
-                <button class="btn">
-                  <span>Add to Cart</span>
-                  <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4"/>
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <path d="M16 10a4 4 0 01-8 0"/>
-                  </svg>
-                </button>
-              </div>
-              <div class="meta">
-                <div class="rating">${stars}<span class="rcount">${product.review_count} Reviews</span></div>
-                <div class="stock">${product.stock_status}</div>
-              </div>
-            </div>
-          </div>
-        `;
+  // 2) Download speed
+  async function measureDownload(url, maxBytes) {
+    const t0 = performance.now();
+    const resp = await fetch(url, {cache:'no-store', mode:'cors'});
+    if (!resp.ok) throw new Error('HTTP '+resp.status);
+    const reader = resp.body.getReader();
+    let bytes = 0;
+    while(true){
+      const {done, value} = await reader.read();
+      if (done) break;
+      bytes += value.length;
+      if (bytes >= maxBytes) { // stop early
+        reader.cancel(); break;
+      }
+    }
+    const t1 = performance.now();
+    return {bytes, ms: t1-t0};
+  }
+  document.getElementById('downloadBtn').addEventListener('click', async () => {
+    const url = document.getElementById('downloadUrl').value.trim();
+    const max = parseInt(document.getElementById('downloadBytes').value) || 5000000;
+    show('downloadResults','Running download...');
+    try {
+      const r = await measureDownload(url, max);
+      const mb = (r.bytes / (1024*1024));
+      const secs = r.ms/1000;
+      const mbps = (mb / secs * 8).toFixed(2);
+      show('downloadResults', `Downloaded ${r.bytes} bytes (${mb.toFixed(2)} MB) in ${secs.toFixed(2)} s — ~${mbps} Mbps`);
+    } catch(e){
+      show('downloadResults','Error: '+e.message);
+    }
+  });
 
-        container.insertAdjacentHTML('beforeend', cardHtml);
-      });
-    })
-    .catch(err => {
-      document.getElementById('products-container').innerHTML = `<p style="color:red; text-align:center;">Failed to load products: ${err.message}</p>`;
-      console.error(err);
-    });
+  // 3) Upload speed (generate blob client-side and POST)
+  document.getElementById('uploadBtn').addEventListener('click', async () => {
+    const url = document.getElementById('uploadUrl').value.trim();
+    const mb = Math.max(0.5, parseFloat(document.getElementById('uploadSize').value) || 1);
+    show('uploadResults', 'Preparing upload...');
+    // Create a random blob of given size
+    const size = Math.round(mb * 1024 * 1024);
+    // fill with zeros to keep memory reasonable: use Uint8Array
+    const chunk = new Uint8Array(1024*256); // 256KB chunk
+    for (let i=0;i<chunk.length;i++) chunk[i]=Math.floor(Math.random()*256);
+    const parts = [];
+    let remaining = size;
+    while(remaining>0) {
+      const take = Math.min(remaining, chunk.length);
+      parts.push(chunk.slice(0,take));
+      remaining -= take;
+    }
+    const blob = new Blob(parts);
+    try {
+      const t0 = performance.now();
+      const resp = await fetch(url, { method:'POST', body: blob, mode:'cors'});
+      const t1 = performance.now();
+      const ms = t1-t0;
+      const secs = ms/1000;
+      const mbSent = size/(1024*1024);
+      const mbps = (mbSent / secs * 8).toFixed(2);
+      const statusText = resp.ok ? `HTTP ${resp.status}` : `HTTP ${resp.status}`;
+      show('uploadResults', `Uploaded ~${mbSent.toFixed(2)} MB in ${secs.toFixed(2)} s — ~${mbps} Mbps<br>${statusText}<br>Response size: ${resp.headers.get('content-length') || 'unknown'}`);
+    } catch (err) {
+      show('uploadResults', 'Error: ' + err.message + '<br>Note: CORS or server policy may block uploads from this page.');
+    }
+  });
+
+  // 4) POST JSON echo
+  document.getElementById('echoBtn').addEventListener('click', async () => {
+    const url = document.getElementById('echoUrl').value.trim();
+    const payloadElem = document.getElementById('jsonPayload');
+    let payload;
+    try { payload = JSON.parse(payloadElem.value); } catch(e){ return show('echoResults','Invalid JSON payload'); }
+    payload.time = new Date().toISOString();
+    show('echoResults','Sending...');
+    try {
+      const resp = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload), mode:'cors' });
+      const txt = await resp.text();
+      show('echoResults', `<strong>HTTP ${resp.status}</strong><pre>${txt.substring(0,2000)}</pre>`);
+    } catch (err) {
+      show('echoResults','Error: ' + err.message + '<br>Make sure endpoint accepts JSON and allows CORS.');
+    }
+  });
+
+  // 5) WebSocket test
+  let ws;
+  document.getElementById('wsConnectBtn').addEventListener('click', () => {
+    const url = document.getElementById('wsUrl').value.trim();
+    if (!url) return show('wsResults','Enter a WebSocket URL.');
+    try {
+      ws = new WebSocket(url);
+    } catch(e) {
+      return show('wsResults','WebSocket construction error: '+e.message);
+    }
+    show('wsResults','Connecting...');
+    ws.onopen = () => {
+      show('wsResults','Connected (ready).');
+      document.getElementById('wsSendBtn').disabled = false;
+      document.getElementById('wsCloseBtn').disabled = false;
+    };
+    ws.onmessage = (ev) => {
+      show('wsResults', `Received: <pre>${ev.data}</pre>`);
+    };
+    ws.onerror = (ev) => {
+      show('wsResults', 'WebSocket error (check console).');
+      console.error(ev);
+    };
+    ws.onclose = (ev) => {
+      show('wsResults', `Closed (code: ${ev.code})`);
+      document.getElementById('wsSendBtn').disabled = true;
+      document.getElementById('wsCloseBtn').disabled = true;
+    };
+  });
+
+  document.getElementById('wsSendBtn').addEventListener('click', () => {
+    if (!ws || ws.readyState !== WebSocket.OPEN) return show('wsResults','WebSocket not open.');
+    const msg = {type:'test', ts:new Date().toISOString(), rand: Math.random().toString(36).slice(2,9)};
+    ws.send(JSON.stringify(msg));
+    show('wsResults', `Sent: <pre>${JSON.stringify(msg)}</pre>`);
+  });
+
+  document.getElementById('wsCloseBtn').addEventListener('click', () => {
+    if (ws) ws.close();
+  });
 </script>
-
 </body>
 </html>
