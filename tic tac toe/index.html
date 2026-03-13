@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Impossible Tic Tac Toe</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    text-align:center;
+    background:#111;
+    color:white;
+}
+
+#board{
+    width:300px;
+    margin:20px auto;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:5px;
+}
+
+.cell{
+    width:100px;
+    height:100px;
+    background:#222;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    cursor:pointer;
+}
+
+.cell:hover{
+    background:#333;
+}
+
+button{
+    padding:10px 20px;
+    margin:5px;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>Impossible Tic Tac Toe</h1>
+
+<button onclick="startGame('pvp')">2 Players</button>
+<button onclick="startGame('ai')">Vs Computer</button>
+
+<h2 id="status"></h2>
+
+<div id="board"></div>
+
+<button onclick="resetGame()">Restart</button>
+
+<script>
+
+let board;
+let currentPlayer;
+let gameMode="ai";
+let gameActive=true;
+
+const statusText=document.getElementById("status");
+const boardDiv=document.getElementById("board");
+
+const wins=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+function startGame(mode){
+gameMode=mode;
+resetGame();
+}
+
+function resetGame(){
+board=["","","","","","","","",""];
+currentPlayer="X";
+gameActive=true;
+drawBoard();
+statusText.innerText="Turn: "+currentPlayer;
+}
+
+function drawBoard(){
+
+boardDiv.innerHTML="";
+
+board.forEach((cell,i)=>{
+
+let div=document.createElement("div");
+div.className="cell";
+div.innerText=cell;
+
+div.onclick=()=>playerMove(i);
+
+boardDiv.appendChild(div);
+
+});
+}
+
+function playerMove(i){
+
+if(!gameActive) return;
+if(board[i]!="") return;
+
+board[i]=currentPlayer;
+
+drawBoard();
+
+if(checkWinner(board,currentPlayer)){
+statusText.innerText=currentPlayer+" Wins!";
+gameActive=false;
+return;
+}
+
+if(isDraw()){
+statusText.innerText="Draw";
+gameActive=false;
+return;
+}
+
+currentPlayer = currentPlayer==="X"?"O":"X";
+
+statusText.innerText="Turn: "+currentPlayer;
+
+if(gameMode==="ai" && currentPlayer==="O"){
+setTimeout(aiMove,200);
+}
+
+}
+
+function aiMove(){
+
+let bestScore=-Infinity;
+let move;
+
+for(let i=0;i<9;i++){
+
+if(board[i]==""){
+
+board[i]="O";
+
+let score=minimax(board,0,false);
+
+board[i]="";
+
+if(score>bestScore){
+bestScore=score;
+move=i;
+}
+
+}
+
+}
+
+board[move]="O";
+
+drawBoard();
+
+if(checkWinner(board,"O")){
+statusText.innerText="Computer Wins!";
+gameActive=false;
+return;
+}
+
+if(isDraw()){
+statusText.innerText="Draw";
+gameActive=false;
+return;
+}
+
+currentPlayer="X";
+statusText.innerText="Turn: X";
+
+}
+
+function minimax(board,depth,isMaximizing){
+
+if(checkWinner(board,"O")) return 10-depth;
+if(checkWinner(board,"X")) return depth-10;
+if(board.every(c=>c!="")) return 0;
+
+if(isMaximizing){
+
+let bestScore=-Infinity;
+
+for(let i=0;i<9;i++){
+
+if(board[i]==""){
+
+board[i]="O";
+
+let score=minimax(board,depth+1,false);
+
+board[i]="";
+
+bestScore=Math.max(score,bestScore);
+
+}
+
+}
+
+return bestScore;
+
+}else{
+
+let bestScore=Infinity;
+
+for(let i=0;i<9;i++){
+
+if(board[i]==""){
+
+board[i]="X";
+
+let score=minimax(board,depth+1,true);
+
+board[i]="";
+
+bestScore=Math.min(score,bestScore);
+
+}
+
+}
+
+return bestScore;
+
+}
+
+}
+
+function checkWinner(b,p){
+
+return wins.some(combo=>{
+let [a,b1,c]=combo;
+return b[a]==p && b[b1]==p && b[c]==p;
+});
+
+}
+
+function isDraw(){
+return board.every(c=>c!="");
+}
+
+resetGame();
+
+</script>
+
+</body>
+</html>
